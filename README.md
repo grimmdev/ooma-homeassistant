@@ -1,4 +1,3 @@
-@@ -0,0 +1,110 @@
 # Ooma Integration for Home Assistant
 
 [![HACS Custom Integration](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/default)
