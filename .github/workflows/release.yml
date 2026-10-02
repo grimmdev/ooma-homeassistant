@@ -1,0 +1,28 @@
+name: "Release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: "Build & Attach HACS Release Asset"
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: write
+    steps:
+      - name: "Checkout repository"
+        uses: "actions/checkout@v4"
+
+      - name: "Zip custom_components/ooma"
+        run: |
+          cd "${{ github.workspace }}/custom_components/ooma"
+          zip -r "${{ github.workspace }}/ooma.zip" .
+
+      - name: "Upload Release Asset"
+        uses: "softprops/action-gh-release@v2"
+        with:
+          files: "${{ github.workspace }}/ooma.zip"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
