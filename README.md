@@ -4,6 +4,10 @@
 [![Validate Integration](https://github.com/grimmdev/ooma-homeassistant/actions/workflows/validate.yml/badge.svg)](https://github.com/grimmdev/ooma-homeassistant/actions/workflows/validate.yml)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2023.8+-blue.svg)](https://home-assistant.io)
 
+<p align="center">
+  <img src="brand/icon.png" width="45%" alt="Icon" />
+</p>
+
 Custom Home Assistant integration for **Ooma (Telo / Linx / Cloud Account)**. Enables real-time call tracking, missed call monitors, voicemail status indicators, and event-driven smart home automations (TTS announcements, notifications, smart lights).
 
 ---
