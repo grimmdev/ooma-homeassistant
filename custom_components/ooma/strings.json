@@ -1,0 +1,32 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Ooma",
+        "description": "Enter your Ooma phone number (or username) and password used to log in at my.ooma.com.",
+        "data": {
+          "username": "Phone Number or Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to Ooma Cloud servers.",
+      "invalid_auth": "Invalid phone number, username, or password.",
+      "unknown": "Unexpected error occurred. Please check logs."
+    },
+    "abort": {
+      "already_configured": "This Ooma account is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ooma Integration Options",
+        "data": {
+          "scan_interval": "Update Interval (seconds)"
+        }
+      }
+    }
+  }
+}
