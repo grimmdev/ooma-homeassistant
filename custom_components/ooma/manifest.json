@@ -1,12 +1,14 @@
 {
   "domain": "ooma",
   "name": "Ooma",
-  "codeowners": ["@grimmdev"],
+  "codeowners": [
+    "@grimmdev"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/grimmdev/ooma-homeassistant",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/grimmdev/ooma-homeassistant/issues",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

@@ -7,6 +7,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
@@ -57,7 +58,7 @@ class OomaDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             return data
 
         except OomaAuthError as err:
-            raise UpdateFailed(f"Authentication error with Ooma: {err}") from err
+            raise ConfigEntryAuthFailed(f"Authentication error with Ooma: {err}") from err
         except OomaError as err:
             raise UpdateFailed(f"Error communicating with Ooma: {err}") from err
         except Exception as err:

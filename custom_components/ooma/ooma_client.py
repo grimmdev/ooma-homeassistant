@@ -145,6 +145,9 @@ class OomaClient:
                     if resp.status not in (200, 302) and "/login" in final_url:
                         raise OomaAuthError(f"Login failed: HTTP {resp.status} at {final_url}")
 
+                    if resp.url.path.startswith("/login"):
+                        raise OomaAuthError("Login failed: redirected back to login page")
+
                     self._is_authenticated = True
                     _LOGGER.info("Successfully authenticated with Ooma Cloud for %s", self.username)
                     return True
@@ -157,7 +160,7 @@ class OomaClient:
         if not self._is_authenticated:
             await self.login()
 
-    async def get_call_logs(self, limit: int = 25) -> List[Dict[str, Any]]:
+    async def get_call_logs(self, limit: int = 25, _retry: bool = True) -> List[Dict[str, Any]]:
         """Fetch recent call logs (inbound, outbound, missed)."""
         await self._ensure_authenticated()
         session = await self._get_session()
@@ -177,10 +180,12 @@ class OomaClient:
 
             async with session.get(CALL_LOGS_URL, timeout=15) as resp:
                 if resp.status == 401 or resp.url.path.startswith("/login"):
+                    if not _retry:
+                        raise OomaAuthError("Authentication failed: session redirected to login")
                     _LOGGER.warning("Session expired while fetching call logs; re-authenticating...")
                     self._is_authenticated = False
                     await self.login()
-                    return await self.get_call_logs(limit)
+                    return await self.get_call_logs(limit, _retry=False)
 
                 html = await resp.text()
                 return self._parse_html_call_logs(html, limit)
@@ -215,7 +220,7 @@ class OomaClient:
             })
         return logs
 
-    async def get_voicemails(self) -> Dict[str, Any]:
+    async def get_voicemails(self, _retry: bool = True) -> Dict[str, Any]:
         """Fetch voicemail summary and list of messages."""
         await self._ensure_authenticated()
         session = await self._get_session()
@@ -231,9 +236,12 @@ class OomaClient:
 
             async with session.get(VOICEMAIL_URL, timeout=15) as resp:
                 if resp.status == 401 or resp.url.path.startswith("/login"):
+                    if not _retry:
+                        raise OomaAuthError("Authentication failed: session redirected to login")
+                    _LOGGER.warning("Session expired while fetching voicemails; re-authenticating...")
                     self._is_authenticated = False
                     await self.login()
-                    return await self.get_voicemails()
+                    return await self.get_voicemails(_retry=False)
 
                 html = await resp.text()
                 return self._parse_html_voicemails(html)
@@ -261,7 +269,7 @@ class OomaClient:
             "messages": [],
         }
 
-    async def get_account_summary(self) -> Dict[str, Any]:
+    async def get_account_summary(self, _retry: bool = True) -> Dict[str, Any]:
         """Fetch general account & device status summary."""
         await self._ensure_authenticated()
         session = await self._get_session()
@@ -269,9 +277,12 @@ class OomaClient:
         try:
             async with session.get(DASHBOARD_URL, timeout=15) as resp:
                 if resp.status == 401 or resp.url.path.startswith("/login"):
+                    if not _retry:
+                        raise OomaAuthError("Authentication failed: session redirected to login")
+                    _LOGGER.warning("Session expired while fetching account summary; re-authenticating...")
                     self._is_authenticated = False
                     await self.login()
-                    return await self.get_account_summary()
+                    return await self.get_account_summary(_retry=False)
 
                 html = await resp.text()
                 is_connected = "offline" not in html.lower() or "connected" in html.lower()

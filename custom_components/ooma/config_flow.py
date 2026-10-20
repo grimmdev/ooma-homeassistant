@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 import logging
 from typing import Any, Dict, Optional
 
@@ -81,21 +82,71 @@ class OomaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> FlowResult:
+        """Handle reauthorization request from coordinator."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: Optional[Dict[str, Any]] = None
+    ) -> FlowResult:
+        """Handle reauthorization confirmation and password update."""
+        errors: Dict[str, str] = {}
+        reauth_entry = self._get_reauth_entry()
+        username = reauth_entry.data[CONF_USERNAME]
+
+        if user_input is not None:
+            password = user_input[CONF_PASSWORD]
+            client = OomaClient(username, password)
+
+            try:
+                await client.login()
+            except OomaAuthError:
+                errors["base"] = "invalid_auth"
+            except OomaConnectionError:
+                errors["base"] = "cannot_connect"
+            except OomaError:
+                errors["base"] = "unknown"
+            except Exception:
+                _LOGGER.exception("Unexpected exception during Ooma reauth validation")
+                errors["base"] = "unknown"
+            finally:
+                await client.close()
+
+            if not errors:
+                return self.async_update_reload_and_abort(
+                    reauth_entry,
+                    data={
+                        **reauth_entry.data,
+                        CONF_PASSWORD: password,
+                    },
+                )
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_PASSWORD): str,
+            }
+        )
+
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=schema,
+            errors=errors,
+            description_placeholders={"username": username},
+        )
+
     @staticmethod
     @callback
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Get the options flow for this handler."""
-        return OomaOptionsFlowHandler(config_entry)
+        return OomaOptionsFlowHandler()
 
 
 class OomaOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options for Ooma."""
-
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
 
     async def async_step_init(
         self, user_input: Optional[Dict[str, Any]] = None

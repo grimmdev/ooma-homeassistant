@@ -8,6 +8,13 @@
           "username": "Phone Number or Username",
           "password": "Password"
         }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate Ooma",
+        "description": "Please enter the new password for Ooma account {username}.",
+        "data": {
+          "password": "Password"
+        }
       }
     },
     "error": {
@@ -16,7 +23,8 @@
       "unknown": "Unexpected error occurred. Please check logs."
     },
     "abort": {
-      "already_configured": "This Ooma account is already configured."
+      "already_configured": "This Ooma account is already configured.",
+      "reauth_successful": "Re-authentication was successful."
     }
   },
   "options": {
